@@ -1,0 +1,76 @@
+一.yaml语法
+1.基本语法
+    k:(空格) v
+    表示一个键值对，空格必须有
+以空格缩进来控制层级关系，左对齐的一列数据，都是一个层级
+    server:
+      port: 8081
+2.值的写法
+    字面量：普通的值(数字，字符串，布尔)
+        k: v        --直接写，字符串默认不用加单引号或双引号
+        "":双引号   --不会转义字符串里面的特殊字符，特殊字符作为本身想表示的意思
+                name: "zhangsan\n lisi"   输出  zhangsan 换行 lisi
+        '':单引号   --会转义特殊字符，特殊字符最终只是一个普通的字符串数据
+                name: "zhangsan\n lisi"   输出  zhangsan\n lisi
+
+    对象，map(属性和值)
+        k: v
+            对象还是键值对k: v的方式
+            friends:
+                lastName: zhang
+                age: 24
+        行内写法：
+            friends: {lastName: zhang,age: 18}
+
+    数组(list,set)
+        用(- 值)表示数组中的一个元素
+        pets:
+         -cat
+         -dog
+         -pig
+        行内写法
+        pets:[cat,dog,pig]
+
+3.配置文件注入
+    Person类
+@ConfigurationProperties(prefix = "person")
+
+@value获取值和@configurationProperties获取值作比较
+                         @value
+功能：                     一个个指定
+松散绑定(松散语法)         不支持
+SpEl:${}                     支持
+JSR303数据校验              不支持
+复杂类型封装                不支持
+
+
+                         @configurationProperties
+功能：                     批量注入配置文件属性
+松散绑定(松散语法)         支持
+SpEl                       不支持
+JSR303数据校验             支持
+复杂类型封装               支持
+
+    1.只是在某个业务逻辑中获取一下配置文件的某个值，使用@value
+    2.专门写了javaBean和配置文件进行映射，直接使用@configurationProperties
+
+
+JSR303数据校验:
+    @Validated
+    数据验证
+
+4.@PropertySource和@ImprotResource
+@PropertySource:加载指定的配置文件
+@ImprotResource:导入Spring的配置文件，让配置文件的内容生效
+Springboot 里没有spring的配置文件，自己编写的配置文件也不能识别
+想让spring的配置文件生效加载进来，@ImportResource标注在一个配置类上
+
+
+SpringBoot推荐给容器中添加组件的方式:推荐使用全注解方式
+1.配置类====spring配置文件
+
+
+
+
+
+

@@ -1,6 +1,24 @@
+#文档块1
 server:
   port: 8081
+spring:
+  profiles:
+    active: prod
 
+---
+#文档块2
+server:
+  port: 8083
+spring:
+  profiles: dev
+
+---
+#文档块3
+server:
+  port: 8084
+spring:
+  profiles: prod
+---
 person:
   lastName: zhangsan
   age: 18

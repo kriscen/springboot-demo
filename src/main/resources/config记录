@@ -141,5 +141,66 @@ SpringBoot推荐给容器中添加组件的方式:推荐使用全注解方式
             从Properties中获取到EnableAutoConfiguration.class类对应的值添加到容器中
     每一个XXXAutoConfiguration类都是容器中的一个组件，加入容器做自动配置
 3.每一个自动配置类进行自动配置功能
-4.以HttpEncodingAutoConfiguration为例解释自动配置原理
-    1.
+4.以HttpEncodingAutoConfiguration(http编码自动配置)为例解释自动配置原理
+    //根据当前不同条件判断，决定这个配置类是否生效
+  //表示这是一个配置类
+  @Configuration
+  //启动指定的类的ConfigurationProperties功能，将配置文件中的值和HttpProperties绑定，并将HttpProperties加入容器中
+  @EnableConfigurationProperties(HttpProperties.class)
+  //spring底层conditional注解，判断不同条件生效配置
+  @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)//判断当前引用是否是web应用
+  //判断当前项目有没有指定类
+  @ConditionalOnClass(CharacterEncodingFilter.class)//springmvc中乱码解决的过滤器
+  //判断配置文件中是否存在某个配置
+  //matchIfMissing = true即使配置文件中不配置spring.http.encoding=true，配置也生效
+  @ConditionalOnProperty(prefix = "spring.http.encoding", value = "enabled", matchIfMissing = true)
+    //和SpringBoot的配置文件做映射
+    private final HttpProperties.Encoding properties;
+
+    //只有一个有参构造器的时候，参数的值会从容器中自动获取
+    public HttpEncodingAutoConfiguration(HttpProperties properties) {
+    		this.properties = properties.getEncoding();
+    }
+
+    //给容器中添加一个组件，这个组件的值从properties中获取
+    @Bean
+	@ConditionalOnMissingBean
+	public CharacterEncodingFilter characterEncodingFilter() {
+		CharacterEncodingFilter filter = new OrderedCharacterEncodingFilter();
+		filter.setEncoding(this.properties.getCharset().name());
+		filter.setForceRequestEncoding(this.properties.shouldForce(Type.REQUEST));
+		filter.setForceResponseEncoding(this.properties.shouldForce(Type.RESPONSE));
+		return filter;
+	}
+---
+一旦配置类生效，这个配置类就会给容器中添加组件，这些组件的属性从对应的properties中获取，
+这些类里面的每一个属性和配置文件绑定。
+
+精髓：
+1）springboot启动会加载大量的自动配置类
+2）看需要的功能有没有springboot默认写好的自动配置类
+3）看自动配置类中配置了哪些组件(只要需要用的组件有，我们就不需要再来配置)
+4）给容器中自动配置类添加组件的时候，会从properties类中获取某些属性，就可以在配置文件中指定这些属性
+
+XXXAutoConfiguration:自动配置类：给容器中添加组件
+XXXProperties：封装配置文件中相关属性
+
+5.所有配置文件中能配置的属性都是在XXX.properties类中封装，配置文件配置什么就可以参照某个功能对应的这个属性类
+
+
+2.细节
+1.@Conditional派生注解(@Conditional)
+作用：必须是@Conditional指定的条件成立，才给容器中添加组件，配置类里面的内容才有生效
+
+ConditionalOnXXX都是基于Conditional的注解
+
+
+查看哪些自动配置类生效
+debug=true
+查看自动配置报告
+
+
+
+
+
+
